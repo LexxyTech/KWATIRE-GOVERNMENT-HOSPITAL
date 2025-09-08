@@ -1,0 +1,393 @@
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kwatire Government Hospital Staff Elections 2025 - April</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    .header {
+      background-color: #28a745;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .header img {
+      width: 100px;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+    .header h1 {
+      display: inline;
+      font-size: 24px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    .parameter {
+      color: #8b0000;
+      font-weight: bold;
+    }
+    .score-group {
+      margin: 15px 0;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 5px;
+      position: relative;
+    }
+    .score-group h3 {
+      margin: 0 0 10px 0;
+    }
+    .score-group label {
+      display: block;
+      margin: 5px 0;
+      padding: 5px;
+      border-radius: 3px;
+    }
+    .score-group input[type="radio"] {
+      margin-right: 10px;
+    }
+    .score-group input[type="radio"]:checked + span {
+      background-color: #e0ffe0;
+      padding: 3px 5px;
+      border-radius: 3px;
+    }
+    .clear-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .clear-btn:hover {
+      background-color: #c82333;
+    }
+    .nominee img {
+      width: 40px;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+    .winner {
+      color: #ffd700;
+      font-weight: bold;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .reset-btn {
+      background-color: #6c757d;
+    }
+    .reset-btn:hover {
+      background-color: #5a6268;
+    }
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    .summary-table th, .summary-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    .summary-table th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="container"></div>
+  <script>
+  const parameters = [
+    "PUNCTUALITY",
+    "ATTITUDE TOWARDS WORK",
+    "ATTITUDE TOWARDS COWORKERS",
+    "DISCIPLINE",
+    "INNOVATIVE",
+    "DRESSING",
+    "WILLINGNESS TO ACCEPT ADDITIONAL TASK"
+  ];
+  const scores = [
+    { label: "GOOD", value: 1 },
+    { label: "BETTER", value: 2 },
+    { label: "BEST", value: 3 }
+  ];
+  const nominees = [
+    { name: "Frederick Tabiri", photo: "https://i.imgur.com/61ffpIV.jpeg" },
+    { name: "Felix Abei", photo: "https://i.imgur.com/HiNimTX.jpeg" },
+    { name: "Mavis Fosuaa", photo: "https://i.imgur.com/xhvBlJk.jpeg" }
+  ];
+  let step = 0;
+  let voterDetails = { staffId: "", surname: "", middleName: "", otherName: "" };
+  let votes = {};
+  let allVotes = []; // Array to store all submitted votes
+
+  // Load voter details from localStorage if available
+  function loadVoterDetails() {
+    const savedDetails = localStorage.getItem('voterDetails');
+    if (savedDetails) {
+      voterDetails = JSON.parse(savedDetails);
+    }
+  }
+
+  function render() {
+    const container = document.getElementById("container");
+    container.innerHTML = `
+      <div class="header">
+        <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
+        <h1>KWATIRE GOVERNMENT HOSPITAL STAFF ELECTIONS 2025 (APRIL)</h1>
+      </div>
+    `;
+
+    if (step === 0) {
+      loadVoterDetails();
+      container.innerHTML += `
+        <h2>Voter Details</h2>
+        <div class="form-group">
+          <label for="staffId">Staff ID <span class="required">*</span></label>
+          <input type="text" id="staffId" placeholder="Enter your Staff ID" value="${voterDetails.staffId}" aria-required="true">
+        </div>
+        <div class="form-group">
+          <label for="surname">Surname <span class="required">*</span></label>
+          <input type="text" id="surname" placeholder="Enter your Surname" value="${voterDetails.surname}" aria-required="true">
+        </div>
+        <div class="form-group">
+          <label for="middleName">Middle Name</label>
+          <input type="text" id="middleName" placeholder="Enter your Middle Name" value="${voterDetails.middleName}">
+        </div>
+        <div class="form-group">
+          <label for="otherName">Other Name</label>
+          <input type="text" id="otherName" placeholder="Enter your Other Name" value="${voterDetails.otherName}">
+        </div>
+        <button onclick="nextStep()">Next</button>
+      `;
+    } else if (step > 0 && step <= parameters.length) {
+      const paramIndex = step - 1;
+      const parameter = parameters[paramIndex];
+      const currentVotes = votes[parameter] || {};
+      container.innerHTML += `
+        <h2>Vote for ${parameter}</h2>
+        <p class="parameter">${parameter}</p>
+        <p>Please assign each score to a different nominee:</p>
+        ${scores.map(score => `
+          <div class="score-group" role="radiogroup" aria-labelledby="score-${score.value}-${paramIndex}-label">
+            <h3 id="score-${score.value}-${paramIndex}-label">${score.label} (${score.value})</h3>
+            <button class="clear-btn" onclick="clearScore('${parameter}', ${score.value}, ${paramIndex})" aria-label="Clear ${score.label} selection">Clear</button>
+            ${nominees.map(nominee => {
+              const isChecked = currentVotes[nominee.name] === score.value;
+              const isDisabled = Object.keys(currentVotes).includes(nominee.name) && !isChecked;
+              return `
+                <label>
+                  <input type="radio" 
+                         name="score-${score.value}-${paramIndex}" 
+                         value="${nominee.name}" 
+                         ${isChecked ? 'checked' : ''} 
+                         ${isDisabled ? 'disabled' : ''} 
+                         onchange="recordVote('${parameter}', '${nominee.name}', ${score.value}, ${paramIndex})"
+                         aria-label="Vote ${score.label} for ${nominee.name}">
+                  <span class="nominee">
+                    <img src="${nominee.photo}" alt="${nominee.name} photo" onerror="this.src='https://via.placeholder.com/40x40?text=F'">
+                    ${nominee.name}
+                  </span>
+                </label>
+              `;
+            }).join('')}
+          </div>
+        `).join('')}
+        <button onclick="nextStep()">Next</button>
+        <button class="reset-btn" onclick="resetVotes()">Reset All Votes</button>
+      `;
+    } else if (step === parameters.length + 1) {
+      container.innerHTML += `
+        <h2>Review Your Votes</h2>
+        <table class="summary-table" role="table" aria-label="Vote Summary">
+          <tr>
+            <th scope="col">Parameter</th>
+            ${nominees.map(nominee => `<th scope="col">${nominee.name}</th>`).join('')}
+          </tr>
+          ${parameters.map(param => `
+            <tr>
+              <td>${param}</td>
+              ${nominees.map(nominee => `
+                <td>${votes[param] && votes[param][nominee.name] ? scores.find(s => s.value === votes[param][nominee.name]).label : '-'}</td>
+              `).join('')}
+            </tr>
+          `).join('')}
+        </table>
+        <button onclick="submitVotes()">Submit Votes</button>
+        <button class="reset-btn" onclick="resetVotes()">Reset All Votes</button>
+        <button onclick="calculateResults()">View Results</button>
+      `;
+    } else {
+      submitVotes();
+    }
+  }
+
+  function nextStep() {
+    if (step === 0) {
+      voterDetails.staffId = document.getElementById("staffId").value.trim() || "";
+      voterDetails.surname = document.getElementById("surname").value.trim() || "";
+      voterDetails.middleName = document.getElementById("middleName").value.trim() || "";
+      voterDetails.otherName = document.getElementById("otherName").value.trim() || "";
+      if (!voterDetails.staffId || !voterDetails.surname) {
+        alert("Please fill in Staff ID and Surname.");
+        return;
+      }
+      localStorage.setItem('voterDetails', JSON.stringify(voterDetails));
+    } else if (step > 0 && step <= parameters.length) {
+      const paramIndex = step - 1;
+      const parameter = parameters[paramIndex];
+      const currentVotes = votes[parameter] || {};
+      const assignedNominees = new Set(Object.keys(currentVotes));
+      const assignedScores = new Set(Object.values(currentVotes));
+      if (assignedScores.size !== scores.length) {
+        const missingScores = scores.filter(s => !assignedScores.has(s.value)).map(s => s.label);
+        alert(`Please assign the following scores for ${parameter}: ${missingScores.join(', ')}.`);
+        return;
+      }
+      if (assignedNominees.size !== scores.length) {
+        alert(`Each score for ${parameter} must be assigned to a different nominee.`);
+        return;
+      }
+    }
+    step++;
+    render();
+  }
+
+  function recordVote(parameter, nominee, score, paramIndex) {
+    votes[parameter] = votes[parameter] || {};
+    votes[parameter][nominee] = score;
+    render(); // Re-render to update UI
+  }
+
+  function clearScore(parameter, score, paramIndex) {
+    if (votes[parameter]) {
+      const nomineeToClear = Object.keys(votes[parameter]).find(nominee => votes[parameter][nominee] === score);
+      if (nomineeToClear) {
+        delete votes[parameter][nomineeToClear];
+        render(); // Re-render to update UI
+      }
+    }
+  }
+
+  function resetVotes() {
+    step = 0;
+    votes = {};
+    localStorage.removeItem('voterDetails'); // Clear saved details
+    render();
+  }
+
+  function submitVotes() {
+    if (Object.keys(votes).length !== parameters.length) {
+      alert("Please complete all voting steps before submitting.");
+      return;
+    }
+    // Save to allVotes array
+    const submissionData = {
+      voterDetails,
+      votes,
+      timestamp: new Date().toISOString()
+    };
+    allVotes.push(submissionData);
+    console.log("Submitted Votes:", submissionData); // Log for now
+    alert("Votes submitted successfully! (This is a demo; data is logged to console.)");
+    // In a real scenario, send to a server: fetch('/api/submit', { method: 'POST', body: JSON.stringify(submissionData) })
+    resetVotes(); // Reset after submission
+  }
+
+  function calculateResults() {
+    // Initialize score totals for each nominee
+    const nomineeScores = {};
+    nominees.forEach(nominee => {
+      nomineeScores[nominee.name] = 0;
+    });
+
+    // Sum scores from all votes
+    allVotes.forEach(submission => {
+      parameters.forEach(param => {
+        nominees.forEach(nominee => {
+          if (submission.votes[param] && submission.votes[param][nominee.name]) {
+            nomineeScores[nominee.name] += submission.votes[param][nominee.name];
+          }
+        });
+      });
+    });
+
+    // Determine winner(s) - highest total score
+    let maxScore = -1;
+    let winners = [];
+    for (const [nominee, score] of Object.entries(nomineeScores)) {
+      if (score > maxScore) {
+        maxScore = score;
+        winners = [nominee];
+      } else if (score === maxScore) {
+        winners.push(nominee);
+      }
+    }
+
+    // Display results
+    const container = document.getElementById("container");
+    container.innerHTML = `
+      <div class="header">
+        <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
+        <h1>KWATIRE GOVERNMENT HOSPITAL STAFF ELECTIONS 2025 (APRIL) - RESULTS</h1>
+      </div>
+      <h2>Election Results</h2>
+      <p>Total votes processed: ${allVotes.length}</p>
+      <table class="summary-table" role="table" aria-label="Election Results">
+        <tr>
+          <th scope="col">Nominee</th>
+          <th scope="col">Total Score</th>
+        </tr>
+        ${nominees.map(nominee => `
+          <tr>
+            <td>${nominee.name}</td>
+            <td>${nomineeScores[nominee.name]} ${winners.includes(nominee.name) ? '<span class="winner">(Winner)</span>' : ''}</td>
+          </tr>
+        `).join('')}
+      </table>
+      <p>${winners.length > 1 ? 'Winners (tie): ' : 'Winner: '} ${winners.join(', ')} with a total score of ${maxScore}</p>
+      <button class="reset-btn" onclick="resetVotes()">Reset and Start Over</button>
+    `;
+  }
+
+  // Initialize
+  render();
+    
+  </script>
+</body>
+</html>
