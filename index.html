@@ -20,7 +20,6 @@ const nominees = [
 let step = 0;
 let voterDetails = { staffId: "", surname: "", middleName: "", otherName: "" };
 let votes = {};
-let allVotes = []; // Array to store all submitted votes
 
 // Load voter details and voted Staff IDs from localStorage
 function loadVoterDetails() {
@@ -28,7 +27,6 @@ function loadVoterDetails() {
   if (savedDetails) {
     voterDetails = JSON.parse(savedDetails);
   }
-  // Load previously voted Staff IDs
   const votedStaffIds = localStorage.getItem('votedStaffIds');
   if (votedStaffIds) {
     window.votedStaffIds = new Set(JSON.parse(votedStaffIds));
@@ -172,7 +170,7 @@ function nextStep() {
 function recordVote(parameter, nominee, score, paramIndex) {
   votes[parameter] = votes[parameter] || {};
   votes[parameter][nominee] = score;
-  render(); // Re-render to update UI
+  render();
 }
 
 function clearScore(parameter, score, paramIndex) {
@@ -180,7 +178,7 @@ function clearScore(parameter, score, paramIndex) {
     const nomineeToClear = Object.keys(votes[parameter]).find(nominee => votes[parameter][nominee] === score);
     if (nomineeToClear) {
       delete votes[parameter][nomineeToClear];
-      render(); // Re-render to update UI
+      render();
     }
   }
 }
@@ -188,94 +186,164 @@ function clearScore(parameter, score, paramIndex) {
 function resetVotes() {
   step = 0;
   votes = {};
-  localStorage.removeItem('voterDetails'); // Clear saved details
-  // Do not clear votedStaffIds here to preserve voting history
+  localStorage.removeItem('voterDetails');
   render();
 }
 
-function submitVotes() {
+async function submitVotes() {
   if (Object.keys(votes).length !== parameters.length) {
     alert("Please complete all voting steps before submitting.");
     return;
   }
-  // Check for duplicate Staff ID
   if (window.votedStaffIds.has(voterDetails.staffId)) {
     alert("You have already voted with this Staff ID. Each Staff ID can vote only once.");
-    resetVotes(); // Reset to start over
+    resetVotes();
     return;
   }
 
-  // Save to allVotes array
-  const submissionData = {
-    voterDetails,
-    votes,
-    timestamp: new Date().toISOString()
-  };
-  allVotes.push(submissionData);
-  // Add Staff ID to voted set and save to localStorage
-  window.votedStaffIds.add(voterDetails.staffId);
-  localStorage.setItem('votedStaffIds', JSON.stringify(Array.from(window.votedStaffIds)));
-
-  console.log("Submitted Votes:", submissionData); // Log for now
-  alert("Votes submitted successfully! (This is a demo; data is logged to console.)");
-  step = parameters.length + 2; // Move to confirmation page
-  render();
+  const submissionData = { voterDetails, votes };
+  try {
+    const response = await fetch('http://localhost:3001/api/submit-vote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(submissionData)
+    });
+    const result = await response.json();
+    if (response.ok) {
+      window.votedStaffIds.add(voterDetails.staffId);
+      localStorage.setItem('votedStaffIds', JSON.stringify(Array.from(window.votedStaffIds)));
+      alert("Votes submitted successfully!");
+      step = parameters.length + 2;
+      render();
+    } else {
+      alert(`Error: ${result.error}`);
+    }
+  } catch (error) {
+    console.error('Error submitting vote:', error);
+    alert("Network error. Please try again.");
+  }
 }
 
-function calculateResults() {
-  // Initialize score totals for each nominee
-  const nomineeScores = {};
-  nominees.forEach(nominee => {
-    nomineeScores[nominee.name] = 0;
-  });
+async function calculateResults() {
+  try {
+    const response = await fetch('http://localhost:3001/api/view-votes', {
+      headers: { 'x-admin-password': prompt('Enter admin password:') }
+    });
+    const votes = await response.json();
+    if (!response.ok) {
+      alert(`Error: ${votes.error}`);
+      return;
+    }
 
-  // Sum scores from all votes
-  allVotes.forEach(submission => {
-    parameters.forEach(param => {
-      nominees.forEach(nominee => {
-        if (submission.votes[param] && submission.votes[param][nominee.name]) {
-          nomineeScores[nominee.name] += submission.votes[param][nominee.name];
-        }
+    const nomineeScores = {};
+    nominees.forEach(nominee => {
+      nomineeScores[nominee.name] = 0;
+    });
+
+    votes.forEach(submission => {
+      parameters.forEach(param => {
+        nominees.forEach(nominee => {
+          if (submission.votes[param] && submission.votes[param][nominee.name]) {
+            nomineeScores[nominee.name] += submission.votes[param][nominee.name];
+          }
+        });
       });
     });
-  });
 
-  // Determine winner(s) - highest total score
-  let maxScore = -1;
-  let winners = [];
-  for (const [nominee, score] of Object.entries(nomineeScores)) {
-    if (score > maxScore) {
-      maxScore = score;
-      winners = [nominee];
-    } else if (score === maxScore) {
-      winners.push(nominee);
+    let maxScore = -1;
+    let winners = [];
+    for (const [nominee, score] of Object.entries(nomineeScores)) {
+      if (score > maxScore) {
+        maxScore = score;
+        winners = [nominee];
+      } else if (score === maxScore) {
+        winners.push(nominee);
+      }
     }
-  }
 
-  // Display results
-  const container = document.getElementById("container");
-  container.innerHTML = `
-    <div class="header">
-      <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
-      <h1>KWATIRE GOVERNMENT HOSPITAL STAFF ELECTIONS 2025 (APRIL) - RESULTS</h1>
-    </div>
-    <h2>Election Results</h2>
-    <p>Total votes processed: ${allVotes.length}</p>
-    <table class="summary-table" role="table" aria-label="Election Results">
-      <tr>
-        <th scope="col">Nominee</th>
-        <th scope="col">Total Score</th>
-      </tr>
-      ${nominees.map(nominee => `
+    const container = document.getElementById("container");
+    container.innerHTML = `
+      <div class="header">
+        <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
+        <h1>KWATIRE GOVERNMENT HOSPITAL STAFF ELECTIONS 2025 (APRIL) - RESULTS</h1>
+      </div>
+      <h2>Election Results</h2>
+      <p>Total votes processed: ${votes.length}</p>
+      <table class="summary-table" role="table" aria-label="Election Results">
         <tr>
-          <td>${nominee.name}</td>
-          <td>${nomineeScores[nominee.name]} ${winners.includes(nominee.name) ? '<span class="winner">(Winner)</span>' : ''}</td>
+          <th scope="col">Nominee</th>
+          <th scope="col">Total Score</th>
         </tr>
-      `).join('')}
-    </table>
-    <p>${winners.length > 1 ? 'Winners (tie): ' : 'Winner: '} ${winners.join(', ')} with a total score of ${maxScore}</p>
-    <button class="reset-btn" onclick="resetVotes()">Reset and Start Over</button>
-  `;
+        ${nominees.map(nominee => `
+          <tr>
+            <td>${nominee.name}</td>
+            <td>${nomineeScores[nominee.name]} ${winners.includes(nominee.name) ? '<span class="winner">(Winner)</span>' : ''}</td>
+          </tr>
+        `).join('')}
+      </table>
+      <p>${winners.length > 1 ? 'Winners (tie): ' : 'Winner: '} ${winners.join(', ')} with a total score of ${maxScore}</p>
+      <button class="reset-btn" onclick="resetVotes()">Reset and Start Over</button>
+      <button onclick="viewSubmittedVotes()">Admin: View Submitted Votes</button>
+    `;
+  } catch (error) {
+    console.error('Error fetching results:', error);
+    alert("Error fetching results. Please check your connection or admin password.");
+  }
+}
+
+async function viewSubmittedVotes() {
+  const password = prompt("Enter admin password to view submitted votes:");
+  try {
+    const response = await fetch('http://localhost:3001/api/view-votes', {
+      headers: { 'x-admin-password': password }
+    });
+    const votes = await response.json();
+    if (!response.ok) {
+      alert(`Error: ${votes.error}`);
+      return calculateResults();
+    }
+
+    const container = document.getElementById("container");
+    container.innerHTML = `
+      <div class="header">
+        <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
+        <h1>KWATIRE GOVERNMENT HOSPITAL STAFF ELECTIONS 2025 (APRIL) - SUBMITTED VOTES</h1>
+      </div>
+      <h2>Submitted Votes</h2>
+      ${votes.length === 0 ? `
+        <p>No votes have been submitted yet.</p>
+      ` : `
+        <table class="summary-table" role="table" aria-label="Submitted Votes">
+          <tr>
+            <th scope="col">Staff ID</th>
+            <th scope="col">Voter Name</th>
+            <th scope="col">Timestamp</th>
+            ${parameters.map(param => `<th scope="col">${param}</th>`).join('')}
+          </tr>
+          ${votes.map((submission, index) => `
+            <tr>
+              <td>${submission.voterDetails.staffId}</td>
+              <td>${submission.voterDetails.surname} ${submission.voterDetails.middleName || ''} ${submission.voterDetails.otherName || ''}</td>
+              <td>${new Date(submission.timestamp).toLocaleString()}</td>
+              ${parameters.map(param => `
+                <td>
+                  ${nominees.map(nominee => `
+                    ${submission.votes[param] && submission.votes[param][nominee.name] ? 
+                      `${nominee.name}: ${scores.find(s => s.value === submission.votes[param][nominee.name]).label}` : ''}
+                  `).filter(Boolean).join('<br>')}
+                </td>
+              `).join('')}
+            </tr>
+          `).join('')}
+        </table>
+      `}
+      <button onclick="calculateResults()">Back to Results</button>
+    `;
+  } catch (error) {
+    console.error('Error fetching votes:', error);
+    alert("Error fetching votes. Please check your connection or admin password.");
+    calculateResults();
+  }
 }
 
 // Initialize
