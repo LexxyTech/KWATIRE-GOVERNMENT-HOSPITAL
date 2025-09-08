@@ -132,6 +132,7 @@
 <body>
   <div class="container" id="container"></div>
  <script>
+ <script>
   const parameters = [
     "PUNCTUALITY",
     "ATTITUDE TOWARDS WORK",
@@ -259,6 +260,13 @@
         <button class="reset-btn" onclick="resetVotes()">Reset All Votes</button>
         <button onclick="calculateResults()">View Results</button>
       `;
+    } else if (step === parameters.length + 2) {
+      // Thank you page
+      container.innerHTML += `
+        <h2>Thank You</h2>
+        <p>THANKS FOR VOTING! Your vote has been recorded.</p>
+        <button class="reset-btn" onclick="resetVotes()">Vote Again (New Voter)</button>
+      `;
     } else {
       submitVotes();
     }
@@ -344,8 +352,8 @@
 
     console.log("Submitted Votes:", submissionData); // Log for now
     alert("Votes submitted successfully! (This is a demo; data is logged to console.)");
-    // In a real scenario, send to a server: fetch('/api/submit', { method: 'POST', body: JSON.stringify(submissionData) })
-    resetVotes(); // Reset after submission
+    step = parameters.length + 2; // Move to thank you page
+    render(); // Show thank you message
   }
 
   function calculateResults() {
