@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -131,7 +131,25 @@
 </head>
 <body>
   <div class="container" id="container"></div>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCFgBeYSQkgYxy12dpzO0QFne271J_Gi6A",
+      authDomain: "kgh-staff-elections.firebaseapp.com",
+      databaseURL: "https://kgh-staff-elections-default-rtdb.firebaseio.com",
+      projectId: "kgh-staff-elections",
+      storageBucket: "kgh-staff-elections.firebasestorage.app",
+      messagingSenderId: "733962213751",
+      appId: "1:733962213751:web:93a8060d3c5555ee0e2972",
+      measurementId: "G-7CH9GTZBD4"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
     const parameters = [
       "PUNCTUALITY",
       "ATTITUDE TOWARDS WORK",
@@ -154,21 +172,6 @@
     let step = 0;
     let voterDetails = { staffId: "", surname: "", middleName: "", otherName: "" };
     let votes = {};
-    let allVotes = []; // Array to store all submitted votes
-
-    // Load voter details and voted Staff IDs from localStorage
-    function loadVoterDetails() {
-      const savedDetails = localStorage.getItem('voterDetails');
-      if (savedDetails) {
-        voterDetails = JSON.parse(savedDetails);
-      }
-      const votedStaffIds = localStorage.getItem('votedStaffIds');
-      if (votedStaffIds) {
-        window.votedStaffIds = new Set(JSON.parse(votedStaffIds));
-      } else {
-        window.votedStaffIds = new Set();
-      }
-    }
 
     function render() {
       const container = document.getElementById("container");
@@ -185,24 +188,23 @@
       `;
 
       if (step === 0) {
-        loadVoterDetails();
         container.innerHTML += `
           <h2>Voter Details</h2>
           <div class="form-group">
             <label for="staffId">Staff ID <span class="required">*</span></label>
-            <input type="text" id="staffId" placeholder="Enter your Staff ID" value="${voterDetails.staffId}" aria-required="true">
+            <input type="text" id="staffId" placeholder="Enter your Staff ID" aria-required="true">
           </div>
           <div class="form-group">
             <label for="surname">Surname <span class="required">*</span></label>
-            <input type="text" id="surname" placeholder="Enter your Surname" value="${voterDetails.surname}" aria-required="true">
+            <input type="text" id="surname" placeholder="Enter your Surname" aria-required="true">
           </div>
           <div class="form-group">
             <label for="middleName">Middle Name</label>
-            <input type="text" id="middleName" placeholder="Enter your Middle Name" value="${voterDetails.middleName}">
+            <input type="text" id="middleName" placeholder="Enter your Middle Name">
           </div>
           <div class="form-group">
             <label for="otherName">Other Name</label>
-            <input type="text" id="otherName" placeholder="Enter your Other Name" value="${voterDetails.otherName}">
+            <input type="text" id="otherName" placeholder="Enter your Other Name">
           </div>
           <button onclick="nextStep()">Next</button>
           <button onclick="viewResultsDirectly()">View Accumulated Results</button>
@@ -324,7 +326,6 @@
       step = 0;
       votes = {};
       localStorage.removeItem('voterDetails');
-      // Do not clear votedStaffIds here to preserve voting history
       render();
     }
 
@@ -333,25 +334,32 @@
         alert("Please complete all voting steps before submitting.");
         return;
       }
-      if (window.votedStaffIds.has(voterDetails.staffId)) {
-        alert("You have already voted with this Staff ID. Each Staff ID can vote only once.");
-        resetVotes();
-        return;
-      }
 
-      const submissionData = {
-        voterDetails,
-        votes,
-        timestamp: new Date().toISOString()
-      };
-      allVotes.push(submissionData);
-      window.votedStaffIds.add(voterDetails.staffId);
-      localStorage.setItem('votedStaffIds', JSON.stringify(Array.from(window.votedStaffIds)));
+      // Check if this Staff ID has already voted
+      const voteRef = firebase.database().ref('votes/' + voterDetails.staffId);
+      voteRef.once('value', (snapshot) => {
+        if (snapshot.exists()) {
+          alert("You have already voted with this Staff ID.");
+          resetVotes();
+          return;
+        }
 
-      console.log("Submitted Votes:", submissionData);
-      alert("Votes submitted successfully! (This is a demo; data is logged to console.)");
-      step = parameters.length + 2;
-      render();
+        const submissionData = {
+          voterDetails,
+          votes,
+          timestamp: new Date().toISOString()
+        };
+        voteRef.set(submissionData)
+          .then(() => {
+            alert("Votes submitted successfully!");
+            step = parameters.length + 2;
+            render();
+          })
+          .catch(error => {
+            console.error("Error submitting vote:", error);
+            alert("Failed to submit vote. Check console for details.");
+          });
+      });
     }
 
     function calculateResults() {
@@ -361,56 +369,63 @@
         return;
       }
 
-      const nomineeScores = {};
-      nominees.forEach(nominee => {
-        nomineeScores[nominee.name] = 0;
-      });
+      const votesRef = firebase.database().ref('votes');
+      votesRef.once('value', (snapshot) => {
+        const allVotes = snapshot.val() || {};
+        const nomineeScores = {};
+        nominees.forEach(nominee => {
+          nomineeScores[nominee.name] = 0;
+        });
 
-      allVotes.forEach(submission => {
-        parameters.forEach(param => {
-          nominees.forEach(nominee => {
-            if (submission.votes[param] && submission.votes[param][nominee.name]) {
-              nomineeScores[nominee.name] += submission.votes[param][nominee.name];
-            }
+        Object.values(allVotes).forEach(submission => {
+          parameters.forEach(param => {
+            nominees.forEach(nominee => {
+              if (submission.votes[param] && submission.votes[param][nominee.name]) {
+                nomineeScores[nominee.name] += submission.votes[param][nominee.name];
+              }
+            });
           });
         });
-      });
 
-      let maxScore = -1;
-      let winners = [];
-      for (const [nominee, score] of Object.entries(nomineeScores)) {
-        if (score > maxScore) {
-          maxScore = score;
-          winners = [nominee];
-        } else if (score === maxScore) {
-          winners.push(nominee);
+        let maxScore = -1;
+        let winners = [];
+        for (const [nominee, score] of Object.entries(nomineeScores)) {
+          if (score > maxScore) {
+            maxScore = score;
+            winners = [nominee];
+          } else if (score === maxScore) {
+            winners.push(nominee);
+          }
         }
-      }
 
-      const container = document.getElementById("container");
-      container.innerHTML = `
-        <div class="header">
-          <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
-          <h1>KWATIRE GOVERNMENT HOSPITAL STAFF ELECTIONS 2025 (APRIL) - RESULTS</h1>
-        </div>
-        <h2>Election Results</h2>
-        <p>Total votes processed: ${allVotes.length}</p>
-        <table class="summary-table" role="table" aria-label="Election Results">
-          <tr>
-            <th scope="col">Nominee</th>
-            <th scope="col">Total Score</th>
-          </tr>
-          ${nominees.map(nominee => `
+        const container = document.getElementById("container");
+        container.innerHTML = `
+          <div class="header">
+            <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
+            <h1>KWATIRE GOVERNMENT HOSPITAL STAFF ELECTIONS 2025 (APRIL) - RESULTS</h1>
+          </div>
+          <h2>Election Results</h2>
+          <p>Total votes processed: ${Object.keys(allVotes).length}</p>
+          <table class="summary-table" role="table" aria-label="Election Results">
             <tr>
-              <td>${nominee.name}</td>
-              <td>${nomineeScores[nominee.name]} ${winners.includes(nominee.name) ? '<span class="winner">(Winner)</span>' : ''}</td>
+              <th scope="col">Nominee</th>
+              <th scope="col">Total Score</th>
             </tr>
-          `).join('')}
-        </table>
-        <p>${winners.length > 1 ? 'Winners (tie): ' : 'Winner: '} ${winners.join(', ')} with a total score of ${maxScore}</p>
-        <button class="reset-btn" onclick="resetVotes()">Reset and Start Over</button>
-        <button onclick="viewSubmittedVotes()">Admin: View Submitted Votes</button>
-      `;
+            ${nominees.map(nominee => `
+              <tr>
+                <td>${nominee.name}</td>
+                <td>${nomineeScores[nominee.name]} ${winners.includes(nominee.name) ? '<span class="winner">(Winner)</span>' : ''}</td>
+              </tr>
+            `).join('')}
+          </table>
+          <p>${winners.length > 1 ? 'Winners (tie): ' : 'Winner: '} ${winners.join(', ')} with a total score of ${maxScore}</p>
+          <button class="reset-btn" onclick="resetVotes()">Reset and Start Over</button>
+          <button onclick="viewSubmittedVotes()">Admin: View Submitted Votes</button>
+        `;
+      }, (error) => {
+        console.error("Error fetching votes:", error);
+        alert("Failed to load results. Check console for details.");
+      });
     }
 
     function viewSubmittedVotes() {
@@ -420,42 +435,50 @@
         return;
       }
 
-      const container = document.getElementById("container");
-      container.innerHTML = `
-        <div class="header">
-          <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
-          <h1>KWATIRE GOVERNMENT HOSPITAL STAFF ELECTIONS 2025 (APRIL) - SUBMITTED VOTES</h1>
-        </div>
-        <h2>Submitted Votes</h2>
-        ${allVotes.length === 0 ? `
-          <p>No votes have been submitted yet.</p>
-        ` : `
-          <table class="summary-table" role="table" aria-label="Submitted Votes">
-            <tr>
-              <th scope="col">Staff ID</th>
-              <th scope="col">Voter Name</th>
-              <th scope="col">Timestamp</th>
-              ${parameters.map(param => `<th scope="col">${param}</th>`).join('')}
-            </tr>
-            ${allVotes.map((submission, index) => `
+      const votesRef = firebase.database().ref('votes');
+      votesRef.once('value', (snapshot) => {
+        const allVotes = snapshot.val() || {};
+
+        const container = document.getElementById("container");
+        container.innerHTML = `
+          <div class="header">
+            <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
+            <h1>KWATIRE GOVERNMENT HOSPITAL STAFF ELECTIONS 2025 (APRIL) - SUBMITTED VOTES</h1>
+          </div>
+          <h2>Submitted Votes</h2>
+          ${Object.keys(allVotes).length === 0 ? `
+            <p>No votes have been submitted yet.</p>
+          ` : `
+            <table class="summary-table" role="table" aria-label="Submitted Votes">
               <tr>
-                <td>${submission.voterDetails.staffId}</td>
-                <td>${submission.voterDetails.surname} ${submission.voterDetails.middleName || ''} ${submission.voterDetails.otherName || ''}</td>
-                <td>${new Date(submission.timestamp).toLocaleString()}</td>
-                ${parameters.map(param => `
-                  <td>
-                    ${nominees.map(nominee => `
-                      ${submission.votes[param] && submission.votes[param][nominee.name] ? 
-                        `${nominee.name}: ${scores.find(s => s.value === submission.votes[param][nominee.name]).label}` : '-'}
-                    `).join('<br>')}
-                  </td>
-                `).join('')}
+                <th scope="col">Staff ID</th>
+                <th scope="col">Voter Name</th>
+                <th scope="col">Timestamp</th>
+                ${parameters.map(param => `<th scope="col">${param}</th>`).join('')}
               </tr>
-            `).join('')}
-          </table>
-        `}
-        <button onclick="calculateResults()">Back to Results</button>
-      `;
+              ${Object.values(allVotes).map((submission, index) => `
+                <tr>
+                  <td>${submission.voterDetails.staffId}</td>
+                  <td>${submission.voterDetails.surname} ${submission.voterDetails.middleName || ''} ${submission.voterDetails.otherName || ''}</td>
+                  <td>${new Date(submission.timestamp).toLocaleString()}</td>
+                  ${parameters.map(param => `
+                    <td>
+                      ${nominees.map(nominee => `
+                        ${submission.votes[param] && submission.votes[param][nominee.name] ? 
+                          `${nominee.name}: ${scores.find(s => s.value === submission.votes[param][nominee.name]).label}` : '-'}
+                      `).join('<br>')}
+                    </td>
+                  `).join('')}
+                </tr>
+              `).join('')}
+            </table>
+          `}
+          <button onclick="calculateResults()">Back to Results</button>
+        `;
+      }, (error) => {
+        console.error("Error fetching votes:", error);
+        alert("Failed to load submitted votes. Check console for details.");
+      });
     }
 
     function viewResultsDirectly() {
