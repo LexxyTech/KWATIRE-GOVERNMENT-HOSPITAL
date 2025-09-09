@@ -205,6 +205,7 @@
             <input type="text" id="otherName" placeholder="Enter your Other Name" value="${voterDetails.otherName}">
           </div>
           <button onclick="nextStep()">Next</button>
+          <button onclick="viewResultsDirectly()">View Accumulated Results</button>
         `;
       } else if (step > 0 && step <= parameters.length) {
         const paramIndex = step - 1;
@@ -455,6 +456,15 @@
         `}
         <button onclick="calculateResults()">Back to Results</button>
       `;
+    }
+
+    function viewResultsDirectly() {
+      const password = prompt("Enter admin password:");
+      if (password !== "admin123") { // Change "admin123" to a secure password
+        alert("Incorrect password.");
+        return;
+      }
+      calculateResults();
     }
 
     // Initialize
