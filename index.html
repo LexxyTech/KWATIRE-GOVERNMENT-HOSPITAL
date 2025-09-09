@@ -1,4 +1,4 @@
-   <!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -354,6 +354,12 @@
     }
 
     function calculateResults() {
+      const password = prompt("Enter admin password:");
+      if (password !== "admin123") { // Change "admin123" to a secure password
+        alert("Incorrect password.");
+        return;
+      }
+
       const nomineeScores = {};
       nominees.forEach(nominee => {
         nomineeScores[nominee.name] = 0;
