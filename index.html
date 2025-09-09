@@ -262,6 +262,7 @@
           <button onclick="submitVotes()">Submit Votes</button>
           <button class="reset-btn" onclick="resetVotes()">Reset All Votes</button>
           <button onclick="calculateResults()">View Results</button>
+          <button onclick="viewSubmittedVotes()">Admin: View Submitted Votes</button>
         `;
       } else if (step === parameters.length + 2) {
         container.innerHTML += `
@@ -402,6 +403,52 @@
         </table>
         <p>${winners.length > 1 ? 'Winners (tie): ' : 'Winner: '} ${winners.join(', ')} with a total score of ${maxScore}</p>
         <button class="reset-btn" onclick="resetVotes()">Reset and Start Over</button>
+        <button onclick="viewSubmittedVotes()">Admin: View Submitted Votes</button>
+      `;
+    }
+
+    function viewSubmittedVotes() {
+      const password = prompt("Enter admin password:");
+      if (password !== "admin123") { // Change "admin123" to a secure password
+        alert("Incorrect password.");
+        return;
+      }
+
+      const container = document.getElementById("container");
+      container.innerHTML = `
+        <div class="header">
+          <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
+          <h1>KWATIRE GOVERNMENT HOSPITAL STAFF ELECTIONS 2025 (APRIL) - SUBMITTED VOTES</h1>
+        </div>
+        <h2>Submitted Votes</h2>
+        ${allVotes.length === 0 ? `
+          <p>No votes have been submitted yet.</p>
+        ` : `
+          <table class="summary-table" role="table" aria-label="Submitted Votes">
+            <tr>
+              <th scope="col">Staff ID</th>
+              <th scope="col">Voter Name</th>
+              <th scope="col">Timestamp</th>
+              ${parameters.map(param => `<th scope="col">${param}</th>`).join('')}
+            </tr>
+            ${allVotes.map((submission, index) => `
+              <tr>
+                <td>${submission.voterDetails.staffId}</td>
+                <td>${submission.voterDetails.surname} ${submission.voterDetails.middleName || ''} ${submission.voterDetails.otherName || ''}</td>
+                <td>${new Date(submission.timestamp).toLocaleString()}</td>
+                ${parameters.map(param => `
+                  <td>
+                    ${nominees.map(nominee => `
+                      ${submission.votes[param] && submission.votes[param][nominee.name] ? 
+                        `${nominee.name}: ${scores.find(s => s.value === submission.votes[param][nominee.name]).label}` : '-'}
+                    `).join('<br>')}
+                  </td>
+                `).join('')}
+              </tr>
+            `).join('')}
+          </table>
+        `}
+        <button onclick="calculateResults()">Back to Results</button>
       `;
     }
 
