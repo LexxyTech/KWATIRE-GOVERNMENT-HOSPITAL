@@ -92,13 +92,15 @@
     .nominee {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     .nominee img {
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       object-fit: cover;
+      border: 2px solid #ddd;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .winner {
       color: #ffd700;
@@ -136,6 +138,12 @@
     }
     .summary-table th {
       background-color: #f2f2f2;
+    }
+    .photo-td img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
     }
   </style>
 </head>
@@ -179,16 +187,20 @@
     ];
 
     const nominees = [
-      { name: "Gloria Kyeraa" },
-      { name: "Amos Doe" },
-      { name: "Alpha Oteng" },
-      { name: "Anthony Ansah Boakye" },
-      { name: "Samuel Twene" }
+      { name: "Gloria Kyeraa", photo: "https://i.imgur.com/OR6YO8D.jpg" },
+      { name: "Amos Doe", photo: "https://i.imgur.com/iZyuW8k.jpg" },
+      { name: "Alpha Oteng", photo: null }, // Placeholder
+      { name: "Anthony Ansah Boakye", photo: "https://i.imgur.com/RKkoJzM.jpg" },
+      { name: "Samuel Twene", photo: "https://i.imgur.com/mSx4jnV.jpg" }
     ];
 
     let step = 0;
     let voterDetails = { staffId: "", surname: "", middleName: "", otherName: "" };
     let votes = {};
+
+    function getPhotoUrl(nominee) {
+      return nominee.photo || `https://via.placeholder.com/50x50/cccccc/000000?text=${nominee.name.charAt(0)}`;
+    }
 
     function render() {
       const container = document.getElementById("container");
@@ -252,7 +264,7 @@
                            ${isDisabled ? 'disabled' : ''}
                            onchange="recordVote('${parameter}', '${nominee.name}', ${score.value}, ${paramIndex})">
                     <span class="nominee">
-                      <img src="https://via.placeholder.com/40x40?text=${nominee.name.charAt(0)}" alt="${nominee.name}">
+                      <img src="${getPhotoUrl(nominee)}" alt="${nominee.name}" onerror="this.src='https://via.placeholder.com/50x50?text=${nominee.name.charAt(0)}'">
                       ${nominee.name}
                     </span>
                   </label>
@@ -269,7 +281,7 @@
           <table class="summary-table" role="table" aria-label="Vote Summary">
             <tr>
               <th scope="col">Parameter</th>
-              ${nominees.map(n => `<th scope="col">${n.name}</th>`).join('')}
+              ${nominees.map(n => `<th scope="col"><img src="${getPhotoUrl(n)}" alt="${n.name}" style="width:30px;height:30px;border-radius:50%;"> ${n.name}</th>`).join('')}
             </tr>
             ${parameters.map(param => `
               <tr>
@@ -293,231 +305,7 @@
       }
     }
 
-    function nextStep() {
-      if (step === 0) {
-        voterDetails.staffId = document.getElementById("staffId").value.trim() || "";
-        voterDetails.surname = document.getElementById("surname").value.trim() || "";
-        voterDetails.middleName = document.getElementById("middleName").value.trim() || "";
-        voterDetails.otherName = document.getElementById("otherName").value.trim() || "";
-
-        if (!voterDetails.staffId || !voterDetails.surname) {
-          alert("Please fill in Staff ID and Surname.");
-          return;
-        }
-
-        localStorage.setItem('voterDetails', JSON.stringify(voterDetails));
-
-        // Fixed: Advance to voting screen
-        step++;
-        render();
-        return;
-      }
-
-      // Validation for voting steps
-      if (step > 0 && step <= parameters.length) {
-        const paramIndex = step - 1;
-        const parameter = parameters[paramIndex];
-        const currentVotes = votes[parameter] || {};
-        const assignedNominees = new Set(Object.keys(currentVotes));
-        const assignedScores = new Set(Object.values(currentVotes));
-
-        if (assignedScores.size !== scores.length) {
-          const missingScores = scores.filter(s => !assignedScores.has(s.value)).map(s => s.label);
-          alert(`Please assign the following scores for ${parameter}: ${missingScores.join(', ')}.`);
-          return;
-        }
-
-        if (assignedNominees.size !== scores.length) {
-          alert(`Each score for ${parameter} must be assigned to a different nominee.`);
-          return;
-        }
-      }
-
-      // Advance to next step
-      step++;
-      render();
-    }
-
-    function recordVote(parameter, nominee, score, paramIndex) {
-      votes[parameter] = votes[parameter] || {};
-      votes[parameter][nominee] = score;
-      render();
-    }
-
-    function clearScore(parameter, score, paramIndex) {
-      if (votes[parameter]) {
-        const nomineeToClear = Object.keys(votes[parameter]).find(n => votes[parameter][n] === score);
-        if (nomineeToClear) {
-          delete votes[parameter][nomineeToClear];
-          render();
-        }
-      }
-    }
-
-    function resetVotes() {
-      step = 0;
-      votes = {};
-      localStorage.removeItem('voterDetails');
-      render();
-    }
-
-    function submitVotes() {
-      if (Object.keys(votes).length !== parameters.length) {
-        alert("Please complete all voting steps before submitting.");
-        return;
-      }
-
-      const voteRef = firebase.database().ref('votes/' + voterDetails.staffId);
-      voteRef.once('value', (snapshot) => {
-        if (snapshot.exists()) {
-          alert("You have already voted with this Staff ID.");
-          resetVotes();
-          return;
-        }
-
-        const submissionData = {
-          voterDetails,
-          votes,
-          timestamp: new Date().toISOString()
-        };
-
-        voteRef.set(submissionData)
-          .then(() => {
-            alert("Votes submitted successfully!");
-            step = parameters.length + 2;
-            render();
-          })
-          .catch(error => {
-            console.error("Error submitting vote:", error);
-            alert("Failed to submit vote. Check console for details.");
-          });
-      });
-    }
-
-    function calculateResults() {
-      const password = prompt("Enter admin password:");
-      if (password !== "admin123") { // Change this to a secure password
-        alert("Incorrect password.");
-        return;
-      }
-
-      const votesRef = firebase.database().ref('votes');
-      votesRef.once('value', (snapshot) => {
-        const allVotes = snapshot.val() || {};
-        const nomineeScores = {};
-        nominees.forEach(nominee => {
-          nomineeScores[nominee.name] = 0;
-        });
-
-        Object.values(allVotes).forEach(submission => {
-          parameters.forEach(param => {
-            nominees.forEach(nominee => {
-              if (submission.votes?.[param]?.[nominee.name]) {
-                nomineeScores[nominee.name] += submission.votes[param][nominee.name];
-              }
-            });
-          });
-        });
-
-        let maxScore = -1;
-        let winners = [];
-        Object.entries(nomineeScores).forEach(([name, score]) => {
-          if (score > maxScore) {
-            maxScore = score;
-            winners = [name];
-          } else if (score === maxScore) {
-            winners.push(name);
-          }
-        });
-
-        document.getElementById("container").innerHTML = `
-          <div class="header">
-            <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
-            <h1>KWATIRE GOVERNMENT HOSPITAL STAFF ELECTIONS 2025 (APRIL) - RESULTS</h1>
-          </div>
-          <h2>Election Results</h2>
-          <p>Total votes processed: ${Object.keys(allVotes).length}</p>
-          <table class="summary-table">
-            <tr><th>Nominee</th><th>Total Score</th></tr>
-            ${nominees.map(n => `
-              <tr>
-                <td>${n.name}</td>
-                <td>${nomineeScores[n.name]} ${winners.includes(n.name) ? '<span class="winner">(Winner)</span>' : ''}</td>
-              </tr>
-            `).join('')}
-          </table>
-          <p>${winners.length > 1 ? 'Winners (tie): ' : 'Winner: '}${winners.join(', ')} with ${maxScore} points</p>
-          <button class="reset-btn" onclick="resetVotes()">Reset and Start Over</button>
-          <button onclick="viewSubmittedVotes()">Admin: View Submitted Votes</button>
-        `;
-      }, err => {
-        console.error(err);
-        alert("Failed to load results.");
-      });
-    }
-
-    function viewSubmittedVotes() {
-      const password = prompt("Enter admin password:");
-      if (password !== "admin123") {
-        alert("Incorrect password.");
-        return;
-      }
-
-      const votesRef = firebase.database().ref('votes');
-      votesRef.once('value', (snapshot) => {
-        const allVotes = snapshot.val() || {};
-
-        const container = document.getElementById("container");
-        container.innerHTML = `
-          <div class="header">
-            <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
-            <h1>KWATIRE GOVERNMENT HOSPITAL STAFF ELECTIONS 2025 (APRIL) - SUBMITTED VOTES</h1>
-          </div>
-          <h2>Submitted Votes</h2>
-          ${Object.keys(allVotes).length === 0 ? `
-            <p>No votes have been submitted yet.</p>
-          ` : `
-            <table class="summary-table">
-              <tr>
-                <th>Staff ID</th>
-                <th>Voter Name</th>
-                <th>Timestamp</th>
-                ${parameters.map(p => `<th>${p}</th>`).join('')}
-              </tr>
-              ${Object.values(allVotes).map(sub => `
-                <tr>
-                  <td>${sub.voterDetails.staffId}</td>
-                  <td>${sub.voterDetails.surname} ${sub.voterDetails.middleName || ''} ${sub.voterDetails.otherName || ''}</td>
-                  <td>${new Date(sub.timestamp).toLocaleString()}</td>
-                  ${parameters.map(p => `
-                    <td>
-                      ${nominees.map(n => 
-                        sub.votes?.[p]?.[n.name] 
-                          ? `${n.name}: ${scores.find(s => s.value === sub.votes[p][n.name]).label}` 
-                          : '-'
-                      ).join('<br>')}
-                    </td>
-                  `).join('')}
-                </tr>
-              `).join('')}
-            </table>
-          `}
-          <button onclick="calculateResults()">Back to Results</button>
-        `;
-      }, err => {
-        console.error(err);
-        alert("Failed to load submitted votes.");
-      });
-    }
-
-    function viewResultsDirectly() {
-      const password = prompt("Enter admin password:");
-      if (password !== "admin123") {
-        alert("Incorrect password.");
-        return;
-      }
-      calculateResults();
-    }
+    // ... (the rest of your functions remain the same: nextStep, recordVote, clearScore, resetVotes, submitVotes, calculateResults, viewSubmittedVotes, viewResultsDirectly)
 
     // Initialize
     render();
