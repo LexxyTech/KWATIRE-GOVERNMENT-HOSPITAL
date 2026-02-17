@@ -5,147 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OVERALL BEST WORKER 2025 – KWATIRE GOVERNMENT HOSPITAL</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+    .header { background-color: #28a745; color: white; padding: 25px 20px; text-align: center; }
+    .header img { width: 100px; vertical-align: middle; margin-right: 10px; }
+    .header h1 { margin: 5px 0; font-size: 26px; }
+    .header h2 { 
+      margin: 0; 
+      font-size: 20px; 
+      color: #ffd700 !important; 
+      font-weight: 700; 
+      text-shadow: 1px 1px 5px rgba(0,0,0,0.7); 
     }
-    .header {
-      background-color: #28a745;
-      color: white;
-      padding: 25px 20px;
-      text-align: center;
-    }
-    .header img {
-      width: 100px;
-      vertical-align: middle;
-      margin-right: 10px;
-    }
-    .header h1 {
-      margin: 5px 0;
-      font-size: 26px;
-    }
-    .header h2 {
-      margin: 0;
-      font-size: 20px;
-      color: #ffd700 !important; /* Yellow/gold – forced with !important */
-      font-weight: 700;
-      text-shadow: 1px 1px 4px rgba(0,0,0,0.6); /* Better visibility */
-    }
-    .container {
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    .form-group input {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-    }
-    .parameter {
-      color: #8b0000;
-      font-weight: bold;
-    }
-    .score-group {
-      margin: 20px 0;
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 8px;
-      position: relative;
-    }
-    .score-group h3 {
-      margin: 0 0 12px 0;
-      font-size: 1.2em;
-    }
-    .score-group label {
-      display: block;
-      margin: 8px 0;
-      padding: 8px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .score-group input[type="radio"] {
-      margin-right: 12px;
-    }
-    .score-group input[type="radio"]:checked + span {
-      background-color: #e0ffe0;
-      font-weight: bold;
-    }
-    .clear-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    .clear-btn:hover {
-      background-color: #c82333;
-    }
-    .nominee {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .nominee img {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #ddd;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .winner {
-      color: #ffd700;
-      font-weight: bold;
-    }
-    button {
-      background-color: #28a745;
-      color: white;
-      padding: 12px 24px;
-      border: none;
-      cursor: pointer;
-      margin: 8px 4px;
-      border-radius: 5px;
-      font-size: 1em;
-    }
-    button:hover {
-      background-color: #218838;
-    }
-    .reset-btn {
-      background-color: #6c757d;
-    }
-    .reset-btn:hover {
-      background-color: #5a6268;
-    }
-    .summary-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-      font-size: 0.95em;
-    }
-    .summary-table th, .summary-table td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-    }
-    .summary-table th {
-      background-color: #f2f2f2;
-    }
+    .container { max-width: 900px; margin: 20px auto; padding: 20px; background-color: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input { width: 100%; padding: 8px; box-sizing: border-box; }
+    .parameter { color: #8b0000; font-weight: bold; }
+    .score-group { margin: 20px 0; border: 1px solid #ddd; padding: 15px; border-radius: 8px; position: relative; }
+    .score-group h3 { margin: 0 0 12px 0; font-size: 1.2em; }
+    .score-group label { display: block; margin: 8px 0; padding: 8px; border-radius: 5px; cursor: pointer; }
+    .score-group input[type="radio"] { margin-right: 12px; }
+    .score-group input[type="radio"]:checked + span { background-color: #e0ffe0; font-weight: bold; }
+    .clear-btn { position: absolute; top: 10px; right: 10px; background-color: #dc3545; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; }
+    .clear-btn:hover { background-color: #c82333; }
+    .nominee { display: flex; align-items: center; gap: 12px; }
+    .nominee img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .winner { color: #ffd700; font-weight: bold; }
+    button { background-color: #28a745; color: white; padding: 12px 24px; border: none; cursor: pointer; margin: 8px 4px; border-radius: 5px; font-size: 1em; }
+    button:hover { background-color: #218838; }
+    .reset-btn { background-color: #6c757d; }
+    .reset-btn:hover { background-color: #5a6268; }
+    .summary-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.95em; }
+    .summary-table th, .summary-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    .summary-table th { background-color: #f2f2f2; }
   </style>
 </head>
 <body>
@@ -187,16 +79,16 @@
     ];
 
     const nominees = [
-      { name: "Sandra Amolaley", photo: null },
-      { name: "Philomina Etornam Dzirasa", photo: null },
+      { name: "Sandra Amolaley", photo: "https://i.imgur.com/B40wHuw.jpeg" },
+      { name: "Philomina Etornam Dzirasa", photo: "https://i.imgur.com/79heoUm.jpeg" },
       { name: "Dr. Dennis Asaah Kwofie", photo: null },
-      { name: "Desmond Amoako Atta", photo: null },
-      { name: "Josephine Pomaa", photo: null },
+      { name: "Desmond Amoako Atta", photo: "https://i.imgur.com/NqOrfat.jpeg" },
+      { name: "Josephine Pomaa", photo: "https://i.imgur.com/8Oh8Err.jpeg" },
       { name: "Anthony Boakye Ansah", photo: "https://i.imgur.com/RKkoJzM.jpeg" },
       { name: "Oteng Alpha", photo: "https://i.imgur.com/NnCh3Gd.jpeg" },
       { name: "Samuel Twene", photo: "https://i.imgur.com/JnoTAlY.jpeg" },
       { name: "Amos Doe", photo: "https://i.imgur.com/iZyuW8k.jpeg" },
-      { name: "Frederick Tabiri", photo: null }
+      { name: "Frederick Tabiri", photo: "https://i.imgur.com/7v05aUw.jpeg" }
     ];
 
     let step = 0;
@@ -314,13 +206,18 @@
     }
 
     function nextStep() {
-      console.log("Next button clicked - current step:", step); // Debug log
+      console.log("Next button clicked - current step:", step); // Debug
 
       if (step === 0) {
-        voterDetails.staffId = document.getElementById("staffId")?.value.trim() || "";
-        voterDetails.surname = document.getElementById("surname")?.value.trim() || "";
-        voterDetails.middleName = document.getElementById("middleName")?.value.trim() || "";
-        voterDetails.otherName = document.getElementById("otherName")?.value.trim() || "";
+        const staffIdInput = document.getElementById("staffId");
+        const surnameInput = document.getElementById("surname");
+        const middleNameInput = document.getElementById("middleName");
+        const otherNameInput = document.getElementById("otherName");
+
+        voterDetails.staffId = staffIdInput ? staffIdInput.value.trim() : "";
+        voterDetails.surname = surnameInput ? surnameInput.value.trim() : "";
+        voterDetails.middleName = middleNameInput ? middleNameInput.value.trim() : "";
+        voterDetails.otherName = otherNameInput ? otherNameInput.value.trim() : "";
 
         if (!voterDetails.staffId || !voterDetails.surname) {
           alert("Please fill in Staff ID and Surname.");
@@ -330,7 +227,7 @@
         localStorage.setItem('voterDetails', JSON.stringify(voterDetails));
 
         step++;
-        console.log("Advancing to step:", step);
+        console.log("Moved to step:", step);
         render();
         return;
       }
@@ -355,7 +252,7 @@
       }
 
       step++;
-      console.log("Advancing to step:", step);
+      console.log("Moved to step:", step);
       render();
     }
 
