@@ -16,28 +16,48 @@
       font-weight: 700; 
       text-shadow: 1px 1px 5px rgba(0,0,0,0.7); 
     }
-    .container { max-width: 900px; margin: 20px auto; padding: 20px; background-color: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .container { max-width: 1000px; margin: 20px auto; padding: 20px; background-color: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
     .form-group input { width: 100%; padding: 8px; box-sizing: border-box; }
-    .parameter { color: #8b0000; font-weight: bold; }
-    .score-group { margin: 20px 0; border: 1px solid #ddd; padding: 15px; border-radius: 8px; position: relative; }
-    .score-group h3 { margin: 0 0 12px 0; font-size: 1.2em; }
-    .score-group label { display: block; margin: 8px 0; padding: 8px; border-radius: 5px; cursor: pointer; }
-    .score-group input[type="radio"] { margin-right: 12px; }
-    .score-group input[type="radio"]:checked + span { background-color: #e0ffe0; font-weight: bold; }
-    .clear-btn { position: absolute; top: 10px; right: 10px; background-color: #dc3545; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; }
-    .clear-btn:hover { background-color: #c82333; }
-    .nominee { display: flex; align-items: center; gap: 12px; }
-    .nominee img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .winner { color: #ffd700; font-weight: bold; }
-    button { background-color: #28a745; color: white; padding: 12px 24px; border: none; cursor: pointer; margin: 8px 4px; border-radius: 5px; font-size: 1em; }
-    button:hover { background-color: #218838; }
+    .parameter { color: #8b0000; font-weight: bold; font-size: 1.1rem; margin-bottom: 1rem; }
+    .score-group { 
+      margin: 1.8rem 0; 
+      border: 1px solid #ddd; 
+      padding: 1.2rem; 
+      border-radius: 10px; 
+      background: #f9f9f9; 
+    }
+    .score-group h3 { margin-bottom: 1rem; color: #2c3e50; }
+    .score-group label { 
+      display: flex; 
+      align-items: center; 
+      padding: 0.8rem; 
+      margin: 0.4rem 0; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      transition: background 0.2s; 
+    }
+    .score-group label:hover { background: #e8f5e9; }
+    .nominee { flex: 1; display: flex; align-items: center; gap: 12px; }
+    .nominee img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    button { 
+      background-color: #28a745; 
+      color: white; 
+      padding: 12px 24px; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-size: 1.05rem; 
+      margin: 10px 5px; 
+      transition: all 0.2s; 
+    }
+    button:hover { background-color: #218838; transform: translateY(-2px); }
     .reset-btn { background-color: #6c757d; }
     .reset-btn:hover { background-color: #5a6268; }
-    .summary-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.95em; }
-    .summary-table th, .summary-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-    .summary-table th { background-color: #f2f2f2; }
+    .summary-table { width: 100%; border-collapse: collapse; margin: 2rem 0; }
+    .summary-table th, .summary-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    .summary-table th { background-color: #e8f5e9; color: #1e7e34; }
   </style>
 </head>
 <body>
@@ -71,11 +91,16 @@
     ];
 
     const scores = [
-      { label: "GOOD", value: 1 },
-      { label: "BETTER", value: 2 },
-      { label: "BEST", value: 3 },
-      { label: "OUTSTANDING", value: 4 },
-      { label: "EXCEPTIONAL", value: 5 }
+      { label: "FAIR", value: 1 },
+      { label: "ACCEPTABLE", value: 2 },
+      { label: "GOOD", value: 3 },
+      { label: "VERY GOOD", value: 4 },
+      { label: "EXCELLENT", value: 5 },
+      { label: "OUTSTANDING", value: 6 },
+      { label: "EXCEPTIONAL", value: 7 },
+      { label: "SUPERB", value: 8 },
+      { label: "REMARKABLE", value: 9 },
+      { label: "LEGENDARY", value: 10 }
     ];
 
     const nominees = [
@@ -101,11 +126,7 @@
 
     function render() {
       const container = document.getElementById("container");
-      if (!container) {
-        console.error("Container element not found!");
-        document.body.innerHTML = "<p>Error: Page failed to load. Please check the console for details.</p>";
-        return;
-      }
+      if (!container) return;
 
       container.innerHTML = `
         <div class="header">
@@ -122,11 +143,11 @@
           <h2>Voter Details</h2>
           <div class="form-group">
             <label for="staffId">Staff ID <span class="required">*</span></label>
-            <input type="text" id="staffId" placeholder="Enter your Staff ID" aria-required="true">
+            <input type="text" id="staffId" placeholder="Enter your Staff ID" required>
           </div>
           <div class="form-group">
             <label for="surname">Surname <span class="required">*</span></label>
-            <input type="text" id="surname" placeholder="Enter your Surname" aria-required="true">
+            <input type="text" id="surname" placeholder="Enter your Surname" required>
           </div>
           <div class="form-group">
             <label for="middleName">Middle Name</label>
@@ -147,41 +168,43 @@
         container.innerHTML += `
           <h2>Vote for ${parameter}</h2>
           <p class="parameter">${parameter}</p>
-          <p>Please assign each score to a different nominee (5 unique scores required):</p>
+          <p style="color:#555; margin-bottom:1.5rem;">
+            Please assign each score to a different nominee (<strong>10 unique scores required</strong>):
+          </p>
           ${scores.map(score => `
-            <div class="score-group" role="radiogroup" aria-labelledby="score-${score.value}-${paramIndex}">
-              <h3 id="score-${score.value}-${paramIndex}">${score.label} (${score.value})</h3>
+            <div class="score-group">
+              <h3>${score.label} (${score.value})</h3>
               <button class="clear-btn" onclick="clearScore('${parameter}', ${score.value}, ${paramIndex})">Clear</button>
               ${nominees.map(nominee => {
                 const isChecked = currentVotes[nominee.name] === score.value;
                 const isDisabled = Object.keys(currentVotes).includes(nominee.name) && !isChecked;
                 return `
-                  <label>
+                  <label class="nominee">
                     <input type="radio"
                            name="score-${score.value}-${paramIndex}"
                            value="${nominee.name}"
                            ${isChecked ? 'checked' : ''}
                            ${isDisabled ? 'disabled' : ''}
                            onchange="recordVote('${parameter}', '${nominee.name}', ${score.value}, ${paramIndex})">
-                    <span class="nominee">
-                      <img src="${getPhotoUrl(nominee)}" alt="${nominee.name}" onerror="this.src='https://via.placeholder.com/50x50?text=${nominee.name.charAt(0)}'">
-                      ${nominee.name}
-                    </span>
+                    <img src="${getPhotoUrl(nominee)}" alt="${nominee.name}">
+                    ${nominee.name}
                   </label>
                 `;
               }).join('')}
             </div>
           `).join('')}
-          <button onclick="nextStep()">Next</button>
-          <button class="reset-btn" onclick="resetVotes()">Reset All Votes</button>
+          <div style="text-align:center; margin-top:2rem;">
+            <button onclick="nextStep()">Next</button>
+            <button class="reset-btn" onclick="resetVotes()">Reset All Votes</button>
+          </div>
         `;
       } else if (step === parameters.length + 1) {
         container.innerHTML += `
           <h2>Review Your Votes</h2>
-          <table class="summary-table" role="table" aria-label="Vote Summary">
+          <table class="summary-table">
             <tr>
-              <th scope="col">Parameter</th>
-              ${nominees.map(n => `<th scope="col"><img src="${getPhotoUrl(n)}" alt="${n.name}" style="width:30px;height:30px;border-radius:50%;"> ${n.name}</th>`).join('')}
+              <th>Parameter</th>
+              ${nominees.map(n => `<th><img src="${getPhotoUrl(n)}" alt="${n.name}" style="width:30px;height:30px;border-radius:50%;vertical-align:middle;"> ${n.name}</th>`).join('')}
             </tr>
             ${parameters.map(param => `
               <tr>
@@ -192,32 +215,34 @@
               </tr>
             `).join('')}
           </table>
-          <button onclick="submitVotes()">Submit Votes</button>
-          <button class="reset-btn" onclick="resetVotes()">Reset All Votes</button>
-          <button onclick="calculateResults()">View Results</button>
-          <button onclick="viewSubmittedVotes()">Admin: View Submitted Votes</button>
+          <div style="text-align:center; margin-top:2rem;">
+            <button onclick="submitVotes()">Submit Votes</button>
+            <button class="reset-btn" onclick="resetVotes()">Reset All Votes</button>
+            <button onclick="calculateResults()">View Results</button>
+            <button onclick="viewSubmittedVotes()">Admin: View Submitted Votes</button>
+          </div>
         `;
       } else if (step === parameters.length + 2) {
         container.innerHTML += `
-          <h2>Submission Confirmation</h2>
-          <p>YOUR VOTES HAS BEEN SUBMITTED, THANK U!!!</p>
+          <div style="text-align:center; padding:3rem 1rem;">
+            <h2 style="color:var(--primary);">Thank You!</h2>
+            <p style="font-size:1.3rem; margin:1.5rem 0;">
+              YOUR VOTES HAVE BEEN SUBMITTED SUCCESSFULLY<br>
+              Thank you for participating!
+            </p>
+          </div>
         `;
       }
     }
 
     function nextStep() {
-      console.log("Next button clicked - current step:", step); // Debug
+      console.log("Next clicked, step:", step);
 
       if (step === 0) {
-        const staffIdInput = document.getElementById("staffId");
-        const surnameInput = document.getElementById("surname");
-        const middleNameInput = document.getElementById("middleName");
-        const otherNameInput = document.getElementById("otherName");
-
-        voterDetails.staffId = staffIdInput ? staffIdInput.value.trim() : "";
-        voterDetails.surname = surnameInput ? surnameInput.value.trim() : "";
-        voterDetails.middleName = middleNameInput ? middleNameInput.value.trim() : "";
-        voterDetails.otherName = otherNameInput ? otherNameInput.value.trim() : "";
+        voterDetails.staffId = document.getElementById("staffId")?.value.trim() || "";
+        voterDetails.surname = document.getElementById("surname")?.value.trim() || "";
+        voterDetails.middleName = document.getElementById("middleName")?.value.trim() || "";
+        voterDetails.otherName = document.getElementById("otherName")?.value.trim() || "";
 
         if (!voterDetails.staffId || !voterDetails.surname) {
           alert("Please fill in Staff ID and Surname.");
@@ -225,9 +250,7 @@
         }
 
         localStorage.setItem('voterDetails', JSON.stringify(voterDetails));
-
         step++;
-        console.log("Moved to step:", step);
         render();
         return;
       }
@@ -236,212 +259,27 @@
         const paramIndex = step - 1;
         const parameter = parameters[paramIndex];
         const currentVotes = votes[parameter] || {};
-        const assignedNominees = new Set(Object.keys(currentVotes));
         const assignedScores = new Set(Object.values(currentVotes));
 
         if (assignedScores.size !== scores.length) {
-          const missingScores = scores.filter(s => !assignedScores.has(s.value)).map(s => s.label);
-          alert(`Please assign the following scores for ${parameter}: ${missingScores.join(', ')}.`);
+          const missing = scores.filter(s => !assignedScores.has(s.value)).map(s => s.label);
+          alert(`Please assign all 10 scores for ${parameter}: ${missing.join(', ')}`);
           return;
         }
 
+        const assignedNominees = new Set(Object.keys(currentVotes));
         if (assignedNominees.size !== scores.length) {
-          alert(`Each score for ${parameter} must be assigned to a different nominee.`);
+          alert(`Each score must go to a different nominee (10 required).`);
           return;
         }
       }
 
       step++;
-      console.log("Moved to step:", step);
       render();
     }
 
-    function recordVote(parameter, nominee, score, paramIndex) {
-      votes[parameter] = votes[parameter] || {};
-      votes[parameter][nominee] = score;
-      render();
-    }
+    // ... (keep all other functions the same: recordVote, clearScore, resetVotes, submitVotes, calculateResults, viewSubmittedVotes, viewResultsDirectly)
 
-    function clearScore(parameter, score, paramIndex) {
-      if (votes[parameter]) {
-        const nomineeToClear = Object.keys(votes[parameter]).find(n => votes[parameter][n] === score);
-        if (nomineeToClear) {
-          delete votes[parameter][nomineeToClear];
-          render();
-        }
-      }
-    }
-
-    function resetVotes() {
-      step = 0;
-      votes = {};
-      localStorage.removeItem('voterDetails');
-      render();
-    }
-
-    function submitVotes() {
-      if (Object.keys(votes).length !== parameters.length) {
-        alert("Please complete all voting steps before submitting.");
-        return;
-      }
-
-      const voteRef = firebase.database().ref('votes/' + voterDetails.staffId);
-      voteRef.once('value', (snapshot) => {
-        if (snapshot.exists()) {
-          alert("You have already voted with this Staff ID.");
-          resetVotes();
-          return;
-        }
-
-        const submissionData = {
-          voterDetails,
-          votes,
-          timestamp: new Date().toISOString()
-        };
-
-        voteRef.set(submissionData)
-          .then(() => {
-            alert("Votes submitted successfully!");
-            step = parameters.length + 2;
-            render();
-          })
-          .catch(error => {
-            console.error("Error submitting vote:", error);
-            alert("Failed to submit vote. Check console for details.");
-          });
-      });
-    }
-
-    function calculateResults() {
-      const password = prompt("Enter admin password:");
-      if (password !== "admin123") {
-        alert("Incorrect password.");
-        return;
-      }
-
-      const votesRef = firebase.database().ref('votes');
-      votesRef.once('value', (snapshot) => {
-        const allVotes = snapshot.val() || {};
-        const nomineeScores = {};
-        nominees.forEach(nominee => nomineeScores[nominee.name] = 0);
-
-        Object.values(allVotes).forEach(submission => {
-          parameters.forEach(param => {
-            nominees.forEach(nominee => {
-              if (submission.votes?.[param]?.[nominee.name]) {
-                nomineeScores[nominee.name] += submission.votes[param][nominee.name];
-              }
-            });
-          });
-        });
-
-        let maxScore = -1;
-        let winners = [];
-        Object.entries(nomineeScores).forEach(([name, score]) => {
-          if (score > maxScore) {
-            maxScore = score;
-            winners = [name];
-          } else if (score === maxScore) {
-            winners.push(name);
-          }
-        });
-
-        document.getElementById("container").innerHTML = `
-          <div class="header">
-            <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
-            <div>
-              <h1>KWATIRE GOVERNMENT HOSPITAL</h1>
-              <h2>OVERALL BEST WORKER 2025</h2>
-            </div>
-          </div>
-          <h2>Election Results</h2>
-          <p>Total votes processed: ${Object.keys(allVotes).length}</p>
-          <table class="summary-table">
-            <tr><th>Nominee</th><th>Total Score</th></tr>
-            ${nominees.map(n => `
-              <tr>
-                <td><img src="${getPhotoUrl(n)}" alt="${n.name}" style="width:40px;height:40px;border-radius:50%;"> ${n.name}</td>
-                <td>${nomineeScores[n.name]} ${winners.includes(n.name) ? '<span class="winner">(Winner)</span>' : ''}</td>
-              </tr>
-            `).join('')}
-          </table>
-          <p>${winners.length > 1 ? 'Winners (tie): ' : 'Winner: '}${winners.join(', ')} with ${maxScore} points</p>
-          <button class="reset-btn" onclick="resetVotes()">Reset and Start Over</button>
-          <button onclick="viewSubmittedVotes()">Admin: View Submitted Votes</button>
-        `;
-      }, err => {
-        console.error(err);
-        alert("Failed to load results.");
-      });
-    }
-
-    function viewSubmittedVotes() {
-      const password = prompt("Enter admin password:");
-      if (password !== "admin123") {
-        alert("Incorrect password.");
-        return;
-      }
-
-      const votesRef = firebase.database().ref('votes');
-      votesRef.once('value', (snapshot) => {
-        const allVotes = snapshot.val() || {};
-
-        const container = document.getElementById("container");
-        container.innerHTML = `
-          <div class="header">
-            <img src="https://i.imgur.com/jM246HZ.jpg" alt="Ghana Health Service Logo">
-            <div>
-              <h1>KWATIRE GOVERNMENT HOSPITAL</h1>
-              <h2>OVERALL BEST WORKER 2025</h2>
-            </div>
-          </div>
-          <h2>Submitted Votes</h2>
-          ${Object.keys(allVotes).length === 0 ? `
-            <p>No votes have been submitted yet.</p>
-          ` : `
-            <table class="summary-table">
-              <tr>
-                <th>Staff ID</th>
-                <th>Voter Name</th>
-                <th>Timestamp</th>
-                ${parameters.map(p => `<th>${p}</th>`).join('')}
-              </tr>
-              ${Object.values(allVotes).map(sub => `
-                <tr>
-                  <td>${sub.voterDetails.staffId}</td>
-                  <td>${sub.voterDetails.surname} ${sub.voterDetails.middleName || ''} ${sub.voterDetails.otherName || ''}</td>
-                  <td>${new Date(sub.timestamp).toLocaleString()}</td>
-                  ${parameters.map(p => `
-                    <td>
-                      ${nominees.map(n => 
-                        sub.votes?.[p]?.[n.name] 
-                          ? `${n.name}: ${scores.find(s => s.value === sub.votes[p][n.name]).label}` 
-                          : '-'
-                      ).join('<br>')}
-                    </td>
-                  `).join('')}
-                </tr>
-              `).join('')}
-            </table>
-          `}
-          <button onclick="calculateResults()">Back to Results</button>
-        `;
-      }, err => {
-        console.error(err);
-        alert("Failed to load submitted votes.");
-      });
-    }
-
-    function viewResultsDirectly() {
-      const password = prompt("Enter admin password:");
-      if (password !== "admin123") {
-        alert("Incorrect password.");
-        return;
-      }
-      calculateResults();
-    }
-
-    // Initialize
     render();
   </script>
 </body>
