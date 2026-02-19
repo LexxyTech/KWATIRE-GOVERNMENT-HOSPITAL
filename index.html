@@ -122,6 +122,21 @@
     let voterDetails = { staffId: "", surname: "", middleName: "", otherName: "" };
     let votes = {};
 
+    // ────────────────────────────────────────────────
+    // Helper: make nominee name safe for Firebase keys
+    // ────────────────────────────────────────────────
+    function safeKey(name) {
+      return name
+        .replace(/\./g, '')          // remove dots
+        .replace(/#/g, '')           // remove hashes
+        .replace(/\$/g, '')          // remove dollars
+        .replace(/\//g, '-')         // slash → dash
+        .replace(/\[/g, '(')         // [ → (
+        .replace(/\]/g, ')')         // ] → )
+        .replace(/\s+/g, ' ')        // normalize spaces
+        .trim();
+    }
+
     function getPhotoUrl(nominee) {
       return nominee.photo || `https://via.placeholder.com/50x50/cccccc/000000?text=${nominee.name.charAt(0)}`;
     }
@@ -178,8 +193,8 @@
               <h3>${score.label} (${score.value})</h3>
               <button class="clear-btn" onclick="clearScore('${parameter}', ${score.value}, ${paramIndex})">Clear</button>
               ${nominees.map(nominee => {
-                const isChecked = currentVotes[nominee.name] === score.value;
-                const isDisabled = Object.keys(currentVotes).includes(nominee.name) && !isChecked;
+                const isChecked = currentVotes[safeKey(nominee.name)] === score.value;
+                const isDisabled = Object.keys(currentVotes).includes(safeKey(nominee.name)) && !isChecked;
                 return `
                   <label class="nominee">
                     <input type="radio"
@@ -211,9 +226,10 @@
             ${parameters.map(param => `
               <tr>
                 <td>${param}</td>
-                ${nominees.map(n => `
-                  <td>${votes[param]?.[n.name] ? scores.find(s => s.value === votes[param][n.name]).label : '-'}</td>
-                `).join('')}
+                ${nominees.map(n => {
+                  const safe = safeKey(n.name);
+                  return `<td>${votes[param]?.[safe] ? scores.find(s => s.value === votes[param][safe]).label : '-'}</td>`;
+                }).join('')}
               </tr>
             `).join('')}
           </table>
@@ -279,16 +295,18 @@
     }
 
     function recordVote(parameter, nominee, score, paramIndex) {
+      const safeNominee = safeKey(nominee);
       votes[parameter] = votes[parameter] || {};
-      votes[parameter][nominee] = score;
+      votes[parameter][safeNominee] = score;
       render();
     }
 
     function clearScore(parameter, score, paramIndex) {
       if (votes[parameter]) {
-        const nomineeToClear = Object.keys(votes[parameter]).find(n => votes[parameter][n] === score);
-        if (nomineeToClear) {
-          delete votes[parameter][nomineeToClear];
+        const safeKeys = Object.keys(votes[parameter]);
+        const safeToClear = safeKeys.find(k => votes[parameter][k] === score);
+        if (safeToClear) {
+          delete votes[parameter][safeToClear];
           render();
         }
       }
@@ -302,61 +320,41 @@
     }
 
     function submitVotes() {
-      console.log("=== SUBMIT VOTES CLICKED ===");
-      console.log("Current step:", step);
-      console.log("parameters.length:", parameters.length);
-      console.log("Number of voted parameters:", Object.keys(votes).length);
-      console.log("Voter details at submit:", voterDetails);
-      console.log("Votes object:", votes);
-
       if (Object.keys(votes).length !== parameters.length) {
-        alert("Please vote on ALL categories before submitting.");
-        console.warn("Blocked: Not all parameters have votes");
+        alert("Please complete all voting steps before submitting.");
         return;
       }
 
-      if (!voterDetails || !voterDetails.staffId || voterDetails.staffId.trim() === "") {
-        alert("Staff ID is missing or invalid. Please go back and re-enter details.");
-        console.warn("Blocked: Invalid or missing staffId");
+      if (!voterDetails.staffId) {
+        alert("Staff ID is missing. Please go back and re-enter details.");
         return;
       }
 
-      const staffId = voterDetails.staffId.trim();
-      console.log("Using Staff ID:", staffId);
+      const voteRef = firebase.database().ref('votes/' + voterDetails.staffId);
+      voteRef.once('value', (snapshot) => {
+        if (snapshot.exists()) {
+          alert("You have already voted with this Staff ID.");
+          resetVotes();
+          return;
+        }
 
-      const voteRef = firebase.database().ref('votes/' + staffId);
+        const submissionData = {
+          voterDetails,
+          votes,
+          timestamp: new Date().toISOString()
+        };
 
-      voteRef.once('value')
-        .then((snapshot) => {
-          console.log("Firebase check - vote already exists?", snapshot.exists());
-
-          if (snapshot.exists()) {
-            alert("You have already voted with this Staff ID.");
-            resetVotes();
-            return;
-          }
-
-          const submissionData = {
-            voterDetails: { ...voterDetails },
-            votes: { ...votes },
-            timestamp: new Date().toISOString()
-          };
-
-          console.log("Preparing to save:", submissionData);
-
-          return voteRef.set(submissionData);
-        })
-        .then(() => {
-          console.log("Vote SAVED successfully!");
-          alert("Votes submitted successfully!");
-          step = parameters.length + 2;
-          render();
-        })
-        .catch((error) => {
-          console.error("Firebase submit FAILED:", error.code || error);
-          console.error("Full error:", error);
-          alert("Failed to submit vote.\n\nError: " + (error.message || "Unknown Firebase error") + "\n\nCheck console (F12) for details.");
-        });
+        voteRef.set(submissionData)
+          .then(() => {
+            alert("Votes submitted successfully!");
+            step = parameters.length + 2;
+            render();
+          })
+          .catch(error => {
+            console.error("Error submitting vote:", error);
+            alert("Failed to submit vote. Check console for details.");
+          });
+      });
     }
 
     function calculateResults() {
@@ -375,8 +373,9 @@
         Object.values(allVotes).forEach(submission => {
           parameters.forEach(param => {
             nominees.forEach(nominee => {
-              if (submission.votes?.[param]?.[nominee.name]) {
-                nomineeScores[nominee.name] += submission.votes[param][nominee.name];
+              const safe = safeKey(nominee.name);
+              if (submission.votes?.[param]?.[safe]) {
+                nomineeScores[nominee.name] += submission.votes[param][safe];
               }
             });
           });
@@ -460,11 +459,12 @@
                   <td>${new Date(sub.timestamp).toLocaleString()}</td>
                   ${parameters.map(p => `
                     <td>
-                      ${nominees.map(n => 
-                        sub.votes?.[p]?.[n.name] 
-                          ? `${n.name}: ${scores.find(s => s.value === sub.votes[p][n.name]).label}` 
-                          : '-'
-                      ).join('<br>')}
+                      ${nominees.map(n => {
+                        const safe = safeKey(n.name);
+                        return sub.votes?.[p]?.[safe] 
+                          ? `${n.name}: ${scores.find(s => s.value === sub.votes[p][safe]).label}` 
+                          : '-';
+                      }).join('<br>')}
                     </td>
                   `).join('')}
                 </tr>
