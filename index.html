@@ -5,138 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OVERALL BEST WORKER 2025 – KWATIRE GOVERNMENT HOSPITAL</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+    .header { background-color: #28a745; color: white; padding: 25px 20px; text-align: center; }
+    .header img { width: 100px; vertical-align: middle; margin-right: 10px; }
+    .header h1 { margin: 5px 0; font-size: 26px; }
+    .header h2 { 
+      margin: 0; 
+      font-size: 20px; 
+      color: #ffd700 !important; 
+      font-weight: 700; 
+      text-shadow: 1px 1px 5px rgba(0,0,0,0.7); 
     }
-    .header {
-      background-color: #28a745;
-      color: white;
-      padding: 25px 20px;
-      text-align: center;
+    .container { max-width: 1000px; margin: 20px auto; padding: 20px; background-color: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input { width: 100%; padding: 8px; box-sizing: border-box; }
+    .parameter { color: #8b0000; font-weight: bold; font-size: 1.1rem; margin-bottom: 1rem; }
+    .score-group { 
+      margin: 1.8rem 0; 
+      border: 1px solid #ddd; 
+      padding: 1.2rem; 
+      border-radius: 10px; 
+      background: #f9f9f9; 
     }
-    .header img {
-      width: 100px;
-      vertical-align: middle;
-      margin-right: 10px;
+    .score-group h3 { margin-bottom: 1rem; color: #2c3e50; }
+    .score-group label { 
+      display: flex; 
+      align-items: center; 
+      padding: 0.8rem; 
+      margin: 0.4rem 0; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      transition: background 0.2s; 
     }
-    .header h1 {
-      margin: 5px 0;
-      font-size: 26px;
+    .score-group label:hover { background: #e8f5e9; }
+    .nominee { flex: 1; display: flex; align-items: center; gap: 12px; }
+    .nominee img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    button { 
+      background: #28a745; 
+      color: white; 
+      border: none; 
+      padding: 0.9rem 1.8rem; 
+      border-radius: 8px; 
+      font-size: 1.05rem; 
+      font-weight: 500; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+      margin: 0 0.5rem; 
     }
-    .header h2 {
-      margin: 0;
-      font-size: 20px;
-      color: #ffd700 !important;
-      font-weight: 700;
-      text-shadow: 1px 1px 5px rgba(0,0,0,0.7);
-    }
-    .container {
-      max-width: 1000px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    .form-group input {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-    }
-    .parameter {
-      color: #8b0000;
-      font-weight: bold;
-      font-size: 1.1rem;
-      margin-bottom: 1rem;
-    }
-    .score-group {
-      margin: 1.8rem 0;
-      border: 1px solid #ddd;
-      padding: 1.2rem;
-      border-radius: 10px;
-      background: #f9f9f9;
-    }
-    .score-group h3 {
-      margin-bottom: 1rem;
-      color: #2c3e50;
-    }
-    .score-group label {
-      display: flex;
-      align-items: center;
-      padding: 0.8rem;
-      margin: 0.4rem 0;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .score-group label:hover {
-      background: #e8f5e9;
-    }
-    .nominee {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .nominee img {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    button {
-      background: #28a745;
-      color: white;
-      border: none;
-      padding: 0.9rem 1.8rem;
-      border-radius: 8px;
-      font-size: 1.05rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin: 0 0.5rem;
-    }
-    button:hover {
-      background: #218838;
-      transform: translateY(-2px);
-    }
-    .reset-btn {
-      background: #6c757d;
-    }
-    .reset-btn:hover {
-      background: #5a6268;
-    }
-    .summary-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 2rem 0;
-    }
-    .summary-table th, .summary-table td {
-      border: 1px solid #ddd;
-      padding: 12px;
-      text-align: left;
-    }
-    .summary-table th {
-      background: #e8f5e9;
-      color: #1e7e34;
-    }
-    .winner {
-      color: #d4af37;
-      font-weight: bold;
-      font-size: 1.15em;
-    }
+    button:hover { background: #218838; transform: translateY(-2px); }
+    .reset-btn { background: #6c757d; }
+    .reset-btn:hover { background: #5a6268; }
+    .summary-table { width: 100%; border-collapse: collapse; margin: 2rem 0; }
+    .summary-table th, .summary-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    .summary-table th { background: #e8f5e9; color: #1e7e34; }
+    .winner { color: #d4af37; font-weight: bold; font-size: 1.15em; }
   </style>
 </head>
 <body>
@@ -379,41 +302,61 @@
     }
 
     function submitVotes() {
+      console.log("=== SUBMIT VOTES CLICKED ===");
+      console.log("Current step:", step);
+      console.log("parameters.length:", parameters.length);
+      console.log("Number of voted parameters:", Object.keys(votes).length);
+      console.log("Voter details at submit:", voterDetails);
+      console.log("Votes object:", votes);
+
       if (Object.keys(votes).length !== parameters.length) {
-        alert("Please complete all voting steps before submitting.");
+        alert("Please vote on ALL categories before submitting.");
+        console.warn("Blocked: Not all parameters have votes");
         return;
       }
 
-      if (!voterDetails.staffId) {
-        alert("Staff ID is missing. Please go back and re-enter details.");
+      if (!voterDetails || !voterDetails.staffId || voterDetails.staffId.trim() === "") {
+        alert("Staff ID is missing or invalid. Please go back and re-enter details.");
+        console.warn("Blocked: Invalid or missing staffId");
         return;
       }
 
-      const voteRef = firebase.database().ref('votes/' + voterDetails.staffId);
-      voteRef.once('value', (snapshot) => {
-        if (snapshot.exists()) {
-          alert("You have already voted with this Staff ID.");
-          resetVotes();
-          return;
-        }
+      const staffId = voterDetails.staffId.trim();
+      console.log("Using Staff ID:", staffId);
 
-        const submissionData = {
-          voterDetails,
-          votes,
-          timestamp: new Date().toISOString()
-        };
+      const voteRef = firebase.database().ref('votes/' + staffId);
 
-        voteRef.set(submissionData)
-          .then(() => {
-            alert("Votes submitted successfully!");
-            step = parameters.length + 2;
-            render();
-          })
-          .catch(error => {
-            console.error("Error submitting vote:", error);
-            alert("Failed to submit vote. Check console for details.");
-          });
-      });
+      voteRef.once('value')
+        .then((snapshot) => {
+          console.log("Firebase check - vote already exists?", snapshot.exists());
+
+          if (snapshot.exists()) {
+            alert("You have already voted with this Staff ID.");
+            resetVotes();
+            return;
+          }
+
+          const submissionData = {
+            voterDetails: { ...voterDetails },
+            votes: { ...votes },
+            timestamp: new Date().toISOString()
+          };
+
+          console.log("Preparing to save:", submissionData);
+
+          return voteRef.set(submissionData);
+        })
+        .then(() => {
+          console.log("Vote SAVED successfully!");
+          alert("Votes submitted successfully!");
+          step = parameters.length + 2;
+          render();
+        })
+        .catch((error) => {
+          console.error("Firebase submit FAILED:", error.code || error);
+          console.error("Full error:", error);
+          alert("Failed to submit vote.\n\nError: " + (error.message || "Unknown Firebase error") + "\n\nCheck console (F12) for details.");
+        });
     }
 
     function calculateResults() {
